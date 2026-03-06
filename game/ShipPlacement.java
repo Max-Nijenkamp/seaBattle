@@ -7,6 +7,7 @@ public class ShipPlacement {
     public int y;
     public boolean horizontal;
 
+    // constructor
     public ShipPlacement(String shipName, int x, int y, boolean horizontal) {
         this.shipName = shipName;
         this.x = x;

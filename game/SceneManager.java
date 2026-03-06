@@ -13,7 +13,7 @@ public class SceneManager {
 
     public static String username;
 
-    /** @param panel the panel to set */
+    // set the panel
     public static void setPanel(JPanel panel, int width, int height) {
         JFrame f = SeaBattleApp.getFrame();
 

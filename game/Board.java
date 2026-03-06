@@ -6,12 +6,12 @@ public class Board {
     private boolean[][] ships = new boolean[SIZE][SIZE];
     private boolean[][] shots = new boolean[SIZE][SIZE];
 
-    /** @param x, y grid coordinates */
+    // place a ship on the board
     public void place(int x, int y) {
         ships[x][y] = true;
     }
 
-    /** @return true = hit, false = miss, null = already shot at this cell (invalid) */
+    // shoot at a cell
     public Boolean shoot(int x, int y) {
         if (x < 0 || x >= SIZE || y < 0 || y >= SIZE || shots[x][y]) return null;
 
@@ -20,7 +20,7 @@ public class Board {
         return ships[x][y];
     }
 
-    /** @return true if all ships are sunk */
+    // check if all ships are sunk
     public boolean allShipsSunk() {
         for (int x = 0; x < SIZE; x++)
             for (int y = 0; y < SIZE; y++)

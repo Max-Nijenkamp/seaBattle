@@ -17,7 +17,7 @@ public class SeaBattleApp {
         });
     }
 
-    /** @return the frame */
+    // get the frame
     public static JFrame getFrame() {
         return frame;
     }

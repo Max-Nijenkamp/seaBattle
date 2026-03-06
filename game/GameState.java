@@ -1,5 +1,6 @@
 package seaBattle.game;
 
+// enum for the game state
 public enum GameState {
     LOBBY,
     PREPARATION,
