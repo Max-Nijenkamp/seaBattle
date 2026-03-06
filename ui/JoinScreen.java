@@ -8,9 +8,10 @@ import javax.swing.*;
 import java.awt.*;
 
 public class JoinScreen {
-    
+
     private static final GameClient client = new GameClient();
     private static final DefaultListModel<String> serverListModel = new DefaultListModel<>();
+    private static final JTextField manualAddressField = new JTextField();
 
     public static JPanel createWaitingPanel() {
         JPanel root = new JPanel(new BorderLayout(20, 20));
@@ -43,7 +44,7 @@ public class JoinScreen {
         title.setHorizontalAlignment(SwingConstants.CENTER);
         root.add(title, BorderLayout.NORTH);
 
-        JLabel hint = new JLabel("Select a game from the list, then click Join.");
+        JLabel hint = new JLabel("Select a game from the list, or enter an address, then click Join.");
         hint.setFont(SeaBattleStyle.BODY_FONT);
         hint.setForeground(SeaBattleStyle.TEXT_MUTED);
         hint.setHorizontalAlignment(SwingConstants.CENTER);
@@ -55,7 +56,22 @@ public class JoinScreen {
         serverList.setBackground(SeaBattleStyle.CARD_BG);
         JScrollPane scroll = new JScrollPane(serverList);
         scroll.setBorder(BorderFactory.createLineBorder(SeaBattleStyle.GRID_LINE, 1));
-        root.add(scroll, BorderLayout.CENTER);
+
+        JPanel center = new JPanel(new BorderLayout(8, 8));
+        center.setBackground(SeaBattleStyle.BG);
+        center.add(scroll, BorderLayout.CENTER);
+
+        JPanel manualPanel = new JPanel(new BorderLayout(4, 4));
+        manualPanel.setBackground(SeaBattleStyle.BG);
+        JLabel manualLabel = new JLabel("Or connect directly (ip:port):");
+        manualLabel.setFont(SeaBattleStyle.BODY_FONT);
+        manualLabel.setForeground(SeaBattleStyle.TEXT_MUTED);
+        manualPanel.add(manualLabel, BorderLayout.NORTH);
+        manualAddressField.setColumns(18);
+        manualPanel.add(manualAddressField, BorderLayout.CENTER);
+        center.add(manualPanel, BorderLayout.SOUTH);
+
+        root.add(center, BorderLayout.CENTER);
 
         LANListener listener = new LANListener();
         listener.listen((ip, name, port) -> {
@@ -68,15 +84,40 @@ public class JoinScreen {
 
         JButton join = new JButton("Join");
         join.addActionListener(e -> {
+            String ip;
+            int port;
+
             String selected = serverList.getSelectedValue();
-            if (selected == null) {
-                JOptionPane.showMessageDialog(root, "Select a game from the list first.", "No game selected", JOptionPane.WARNING_MESSAGE);
-                return;
+            if (selected != null) {
+                int sep = selected.indexOf(" — ");
+                int colon = selected.indexOf(":");
+                if (sep < 0 || colon < 0 || colon <= sep + 3) {
+                    JOptionPane.showMessageDialog(root, "The selected entry has an invalid address.", "Invalid address", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                ip = selected.substring(sep + 3, colon).trim();
+                port = Integer.parseInt(selected.substring(colon + 1).trim());
+            } else {
+                String manual = manualAddressField.getText().trim();
+                if (manual.isEmpty()) {
+                    JOptionPane.showMessageDialog(root, "Select a game from the list or enter an address.", "No game selected", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                try {
+                    int colon = manual.lastIndexOf(':');
+                    if (colon >= 0) {
+                        ip = manual.substring(0, colon).trim();
+                        port = Integer.parseInt(manual.substring(colon + 1).trim());
+                    } else {
+                        ip = manual;
+                        port = 5000;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(root, "Could not parse the port from the address. Use format ip:port.", "Invalid address", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             }
-            int sep = selected.indexOf(" — ");
-            int colon = selected.indexOf(":");
-            String ip = selected.substring(sep + 3, colon).trim();
-            int port = Integer.parseInt(selected.substring(colon + 1).trim());
+
             if (client.connect(ip, port, SceneManager.username)) {
                 SceneManager.setPanel(createWaitingPanel(), 480, 280);
             } else {
