@@ -192,14 +192,14 @@ public class GameServer {
         Boolean result = target.shoot(x, y);
         int other = 1 - shooter;
 
-            boolean hit = result;
-            if (hit) {
-                sendToPlayer(shooter, "HIT;" + x + ";" + y);
-                sendToPlayer(other, "HIT_AT;" + x + ";" + y);
-            } else {
-                sendToPlayer(shooter, "MISS;" + x + ";" + y);
-                sendToPlayer(other, "MISS_AT;" + x + ";" + y);
-            }
+        boolean hit = result;
+        
+        if (hit) {
+            sendToPlayer(shooter, "HIT;" + x + ";" + y);
+            sendToPlayer(other, "HIT_AT;" + x + ";" + y);
+        } else {
+            sendToPlayer(shooter, "MISS;" + x + ";" + y);
+            sendToPlayer(other, "MISS_AT;" + x + ";" + y);
         }
 
         if (target.allShipsSunk()) {
