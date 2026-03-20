@@ -170,7 +170,6 @@ public class GameServer {
                     }
 
                     if (line.startsWith("SHOT;")) {
-                        if (playerId != currentTurn) continue;
                         String[] p = line.split(";");
                         int x = Integer.parseInt(p[1]);
                         int y = Integer.parseInt(p[2]);
@@ -186,20 +185,21 @@ public class GameServer {
     }
 
     // handle a shot
-    private void handleShot(int shooter, int x, int y) {
+    private synchronized void handleShot(int shooter, int x, int y) {
+        if (shooter != currentTurn) return;
+
         Board target = (shooter == 0) ? clientBoard : hostBoard;
         Boolean result = target.shoot(x, y);
-        if (result == null) return;
-
-        boolean hit = result;
         int other = 1 - shooter;
 
-        if (hit) {
-            sendToPlayer(shooter, "HIT;" + x + ";" + y);
-            sendToPlayer(other, "HIT_AT;" + x + ";" + y);
-        } else {
-            sendToPlayer(shooter, "MISS;" + x + ";" + y);
-            sendToPlayer(other, "MISS_AT;" + x + ";" + y);
+            boolean hit = result;
+            if (hit) {
+                sendToPlayer(shooter, "HIT;" + x + ";" + y);
+                sendToPlayer(other, "HIT_AT;" + x + ";" + y);
+            } else {
+                sendToPlayer(shooter, "MISS;" + x + ";" + y);
+                sendToPlayer(other, "MISS_AT;" + x + ";" + y);
+            }
         }
 
         if (target.allShipsSunk()) {
